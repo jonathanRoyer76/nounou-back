@@ -1,17 +1,26 @@
 package com.nounou.entities;
 
-import javax.persistence.Column;
-import javax.persistence.*;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
 /**
  * User
  */
 @Entity
-@Table(name = "Users")
+@Table(name = "users")
 public class User {
 
     @Id
-    @Column(name = "Id")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
@@ -21,7 +30,24 @@ public class User {
     private boolean isActive = true;
     private boolean isAdmin = false;
 
-    /**
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
+    private Set<Role> roles;
+
+    public User(User user) {
+        this.setActive(user.isActive());
+        this.setUserName(user.getUserName());
+        this.setPassword(this.getPassword());        
+        this.setRoles(user.getRoles());
+        this.setEmail(user.getEmail());
+        this.setId(user.getId());
+    }
+    
+    public User(){
+
+    }
+
+	/**
      * @return the id
      */
     public int getId() {
@@ -89,6 +115,20 @@ public class User {
      */
     public void setActive(boolean isActive) {
         this.isActive = isActive;
+    }
+
+    /**
+     * @return the roles
+     */
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    /**
+     * @param roles the roles to set
+     */
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
     }
 
     /**
