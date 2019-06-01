@@ -8,7 +8,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
 /**
  * WebSecurity
  */
@@ -31,7 +30,9 @@ public class WebSecurity extends WebSecurityConfigurerAdapter{
         p_http.csrf()
             .disable()
             .authorizeRequests()
-            .antMatchers(HttpMethod.POST, SecurityConstants.SIGN_UP_URL).permitAll()
+            // .antMatchers(HttpMethod.POST, SecurityConstants.SIGN_UP_URL).permitAll()
+            .antMatchers("**/users/**").permitAll()
+            // .anyRequest().permitAll()
             .and()
             .addFilter(new JWTAuthenticationFilter())
             .addFilter(new JWTAuthorizationFilter(authenticationManager()));

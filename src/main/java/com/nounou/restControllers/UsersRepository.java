@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UsersRepository {
 
     @Autowired
-    private IRepoUsers _repoUsers;
+    private IRepoUsers _repoUsers;    
     @Autowired
     private BCryptPasswordEncoder _passwordEncoder;
 
@@ -32,7 +32,7 @@ public class UsersRepository {
     public User add(final @RequestBody User p_user) {
 
         if (p_user != null) {
-            
+            p_user.setPassword(_passwordEncoder.encode(p_user.getPassword()));
             return this._repoUsers.save(p_user);
         }
 
@@ -42,11 +42,10 @@ public class UsersRepository {
     @PostMapping(value = "sign-up")
     @CrossOrigin(origins = "*")
     public void signUp(User p_user){
-        p_user.setPassword(_passwordEncoder.encode(p_user.getPassword()));
-        _repoUsers.save(p_user);
+        
+        this.add(p_user);
     }
 
-    @PreAuthorize("hasAnyRole('admin')")
     @GetMapping("getAll")
     @CrossOrigin(origins = "*")
     public List<User> getAll() {
