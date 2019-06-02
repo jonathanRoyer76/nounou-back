@@ -1,17 +1,19 @@
 package com.nounou.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 /**
  * WebSecurity
  */
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(securedEnabled = true)
 public class WebSecurity extends WebSecurityConfigurerAdapter{
 
     @Autowired
@@ -27,15 +29,16 @@ public class WebSecurity extends WebSecurityConfigurerAdapter{
 
     @Override
     public void configure(HttpSecurity p_http) throws Exception{
-        p_http.csrf()
-            .disable()
+
+        p_http.csrf().disable()
             .authorizeRequests()
-            // .antMatchers(HttpMethod.POST, SecurityConstants.SIGN_UP_URL).permitAll()
-            .antMatchers("**/users/**").permitAll()
-            // .anyRequest().permitAll()
+            .antMatchers("/users/public", "/users/add", "/users/sign-up").permitAll()   // Chemins accessibles publiquement
+            .anyRequest().authenticated()
             .and()
-            .addFilter(new JWTAuthenticationFilter())
-            .addFilter(new JWTAuthorizationFilter(authenticationManager()));
+            .addFilter(new JWTAuthenticationFilter(authenticationManager()))
+            .addFilter(new JWTAuthorizationFilter(authenticationManager()))
+            .sessionManagement()
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     }
 
 }

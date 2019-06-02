@@ -6,7 +6,6 @@ import com.nounou.entities.User;
 import com.nounou.interfacesRepositories.IRepoUsers;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,11 +15,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * UsersRepository
+ * restControllerUsers
  */
 @RestController
 @RequestMapping("users")
-public class UsersRepository {
+public class restControllerUsers {
 
     @Autowired
     private IRepoUsers _repoUsers;    
@@ -29,7 +28,7 @@ public class UsersRepository {
 
     @PostMapping(value = "add")
     @CrossOrigin(origins = "*")
-    public User add(final @RequestBody User p_user) {
+    public User add(final User p_user) {
 
         if (p_user != null) {
             p_user.setPassword(_passwordEncoder.encode(p_user.getPassword()));
@@ -39,19 +38,41 @@ public class UsersRepository {
         return p_user;
     }
 
+    /**
+     * Endpoint for registering a new user
+     * @param p_user 
+     */
     @PostMapping(value = "sign-up")
     @CrossOrigin(origins = "*")
-    public void signUp(User p_user){
+    public void signUp(final User p_user){
         
         this.add(p_user);
     }
 
+    /**
+     * Find and return every User in DB
+     * @return List<User>
+     */
     @GetMapping("getAll")
     @CrossOrigin(origins = "*")
     public List<User> getAll() {
 
         return this._repoUsers.findAll();
 
+    }
+
+    @GetMapping("public")
+    @CrossOrigin(value = "*")
+    public String test(){
+
+        return "Dans la méthode de test PUBLIC";
+    }
+
+    @GetMapping("private")
+    @CrossOrigin(value = "*")
+    public String testPrive(){
+
+        return "Dans la méthode de test PRIVEE";
     }
 
     @PostMapping(value = "update")
@@ -61,5 +82,4 @@ public class UsersRepository {
         return this.add(p_user);
         
     }
-
 }
