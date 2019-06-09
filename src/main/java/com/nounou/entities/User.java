@@ -115,20 +115,6 @@ public class User {
     }
 
     /**
-     * @return the roles
-     */
-    public Set<Role> getRoles() {
-        return roles;
-    }
-
-    /**
-     * @param roles the roles to set
-     */
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
-    }
-
-    /**
      * @return the isAdmin
      */
     public boolean isAdmin() {
