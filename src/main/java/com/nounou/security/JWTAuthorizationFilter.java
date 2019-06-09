@@ -33,7 +33,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 
     private static final Logger log = LoggerFactory.getLogger(JWTAuthorizationFilter.class);
 
-    public JWTAuthorizationFilter(AuthenticationManager authenticationManager) {
+    public JWTAuthorizationFilter(AuthenticationManager authenticationManager){
         super(authenticationManager);
     }
 
@@ -70,7 +70,8 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
                     .collect(Collectors.toList());
 
                 if (!StringUtils.isEmpty(username)) {
-                    return new UsernamePasswordAuthenticationToken(username, null, authorities);
+                    UsernamePasswordAuthenticationToken returnObject = new UsernamePasswordAuthenticationToken(username, null, authorities);
+                    return returnObject;
                 }
             } catch (ExpiredJwtException exception) {
                 log.warn("Request to parse expired JWT : {} failed : {}", token, exception.getMessage());

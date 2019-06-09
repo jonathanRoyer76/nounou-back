@@ -1,8 +1,10 @@
 package com.nounou.security;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.servlet.FilterChain;
@@ -10,14 +12,15 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.nounou.entities.User;
+import com.nounou.interfacesRepositories.IRepoUsers;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import io.jsonwebtoken.Jwts;
@@ -28,44 +31,45 @@ import io.jsonwebtoken.SignatureAlgorithm;
  */
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter{
 
-    private static final Logger log = LoggerFactory.getLogger(JWTAuthorizationFilter.class);
+    private static final Logger logger = LoggerFactory.getLogger(JWTAuthorizationFilter.class);
 
-    private AuthenticationManager _authenticationManager;
+    private AuthenticationManagerImpl _authenticationManager;
 
-    public JWTAuthenticationFilter(AuthenticationManager manager){
+    private IRepoUsers _repoUser;
+
+    public JWTAuthenticationFilter(AuthenticationManagerImpl manager
+    , IRepoUsers p_repoUsers
+    ){
         this._authenticationManager = manager;
-    }
+        this._repoUser = p_repoUsers;
+       }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest req,
                                                 HttpServletResponse res) throws AuthenticationException {
-        // try {
-        //     User creds = new ObjectMapper()
-        //             .readValue(req.getInputStream(), User.class);
-        //     return _authenticationManager.authenticate(
-        //             new UsernamePasswordAuthenticationToken(
-        //                     creds.getUserName(),
-        //                     creds.getPassword(),
-        //                     new ArrayList<>())
-        //     );
-        // } catch (IOException e) {
-        //     throw new RuntimeException(e);
-        // }
 
         String username = req.getParameter("userName");
         if (username == "")
-            log.warn("UserName absent dans le header de la requète");
+            logger.warn("UserName absent dans le header de la requète");
         String password = req.getParameter("password");
         if (password == "")
-            log.warn("Password absent dans le header de la requète");
-        
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
+            logger.warn("Password absent dans le header de la requète");
+
+        Collection<? extends GrantedAuthority> authoritiesList = null;
+
+        Optional<User> optionUser = this._repoUser.findByUserName(username);
+        if (optionUser.isPresent()){
+            User user = optionUser.get();
+            UserPrincipal userPrincipal = new UserPrincipal(user);
+            authoritiesList = userPrincipal.getAuthorities();
+        }
 
         Authentication temp = null;
         try{
-            temp = _authenticationManager.authenticate(authenticationToken);
+            _authenticationManager.setPasswordToEncrypt(password);
+            temp = _authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password, authoritiesList));
         }catch (Exception e){
-            log.error(e.toString());
+            logger.error(e.toString());
         }
         return temp;
     }
@@ -78,27 +82,24 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         String token = "";
         try{
-            log.info("Construction du user");
-            UserDetails user = (UserDetails)auth.getPrincipal();
 
-            log.info("Construction des rôles");
-            List<String> roles = user.getAuthorities()
+            List<String> roles = auth.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
-            log.info("Construction du token");
+            logger.info("Construction du token");
             token = Jwts.builder()
                 .signWith(SignatureAlgorithm.HS256, SecurityConstants.SIGNING_KEY)
                 .setHeaderParam("typ", SecurityConstants.TOKEN_TYPE)
-                // .setIssuer(SecurityConstants.TOKEN_ISSUER)
-                // .setAudience(SecurityConstants.TOKEN_AUDIENCE)
-                .setSubject(user.getUsername())
+                .setIssuer(SecurityConstants.TOKEN_ISSUER)
+                .setAudience(SecurityConstants.TOKEN_AUDIENCE)
+                .setSubject(auth.getName())
                 .setExpiration(new Date(System.currentTimeMillis() + 864000000))
                 .claim("rol", roles)
                 .compact();
         }catch(Exception e){
-            log.error(e.toString());
+            logger.error(e.toString());
         }
 
         res.addHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + token);

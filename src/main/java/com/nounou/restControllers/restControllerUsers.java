@@ -1,6 +1,8 @@
 package com.nounou.restControllers;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.nounou.entities.User;
 import com.nounou.interfacesRepositories.IRepoUsers;
@@ -9,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -57,7 +60,28 @@ public class restControllerUsers {
     @CrossOrigin(origins = "*")
     public List<User> getAll() {
 
-        return this._repoUsers.findAll();
+        ArrayList<User> usersList = this._repoUsers.findAll();
+        return usersList;
+
+    }
+
+    /**
+     * Find and return a User by his id
+     * @return List<User>
+     */
+    @GetMapping("get/{id}")
+    @CrossOrigin(origins = "*")
+    public User getById(@PathVariable("id") int p_id) {
+
+        if (p_id != 0){
+           Optional<User> optionUser = this._repoUsers.findById(p_id);
+           if (optionUser.isPresent()){
+               User user = optionUser.get();
+               return user;
+           }
+        }
+
+        return null;
 
     }
 
