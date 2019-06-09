@@ -1,49 +1,61 @@
 package com.nounou.entities;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * Role
  */
 @Entity
-@Table(name = "role")
+@Table(name = "roles")
 public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
+    private String name;
 
-    private String roleName;
+    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties({"role"})
+    private Set<User> users = new HashSet<>();
 
-    /**
-     * @return the id
-     */
+    public Role(String p_name){
+        this.setName(p_name);
+    }
+
+    public Role(){}
+
     public int getId() {
         return id;
     }
 
-    /**
-     * @param id the id to set
-     */
     public void setId(int id) {
         this.id = id;
     }
 
-    /**
-     * @return the roleName
-     */
-    public String getRoleName() {
-        return roleName;
+    public String getName() {
+        return name;
     }
 
-    /**
-     * @param roleName the roleName to set
-     */
-    public void setRoleName(String roleName) {
-        this.roleName = roleName;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Set<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(Set<User> users) {
+        this.users = users;
     }
 }

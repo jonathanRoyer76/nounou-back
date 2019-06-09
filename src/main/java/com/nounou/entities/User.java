@@ -1,17 +1,14 @@
 package com.nounou.entities;
 
-import java.util.Set;
-
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.OneToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * User
@@ -30,15 +27,15 @@ public class User {
     private boolean isActive = true;
     private boolean isAdmin = false;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
-    private Set<Role> roles;
+    @ManyToOne
+    @JoinColumn(name = "role_id")
+    @JsonIgnoreProperties({"users"})
+    private Role role;
 
     public User(User user) {
         this.setActive(user.isActive());
         this.setUserName(user.getUserName());
-        this.setPassword(this.getPassword());        
-        this.setRoles(user.getRoles());
+        this.setPassword(this.getPassword());    
         this.setEmail(user.getEmail());
         this.setId(user.getId());
     }
@@ -144,4 +141,13 @@ public class User {
     public void setAdmin(boolean isAdmin) {
         this.isAdmin = isAdmin;
     }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
 }
