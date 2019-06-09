@@ -85,20 +85,6 @@ public class restControllerUsers {
 
     }
 
-    @GetMapping("public")
-    @CrossOrigin(value = "*")
-    public String test(){
-
-        return "Dans la méthode de test PUBLIC";
-    }
-
-    @GetMapping("private")
-    @CrossOrigin(value = "*")
-    public String testPrive(){
-
-        return "Dans la méthode de test PRIVEE";
-    }
-
     @PostMapping(value = "update")
     @CrossOrigin(origins = "*")
     public User update(final @RequestBody User p_user) {
