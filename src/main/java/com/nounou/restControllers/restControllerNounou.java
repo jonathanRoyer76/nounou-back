@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("nounou")
 public class restControllerNounou {
 
-    @GetMapping(value = "home")
     @CrossOrigin(origins = "*")
+    @GetMapping(value = "home")    
     public String home(){
         return "Dans la méthode de nounou";
     }

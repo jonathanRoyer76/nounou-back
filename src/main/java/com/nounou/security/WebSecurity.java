@@ -1,8 +1,11 @@
 package com.nounou.security;
 
+import java.util.Arrays;
+
 import com.nounou.interfacesRepositories.IRepoUsers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -11,6 +14,9 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 /**
  * WebSecurity
  */
@@ -46,13 +52,25 @@ public class WebSecurity extends WebSecurityConfigurerAdapter{
             .antMatchers("/admin/**").hasAuthority(ROLE_ADMIN)
             .antMatchers("/nounou/**").hasAnyAuthority(ROLE_ADMIN, ROLE_NOUNOU)
             .antMatchers("/users/**").hasAnyAuthority(ROLE_ADMIN, ROLE_NOUNOU)
-            .antMatchers("/users/sign-up").permitAll()  // Chemins accessibles publiquement
+            .antMatchers("/users/sign-up", "/", "/login").permitAll()  // Chemins accessibles publiquement
             .anyRequest().authenticated()
             .and()
             .addFilter(new JWTAuthenticationFilter(this._authImpl, this._repoUser))
             .addFilter(new JWTAuthorizationFilter(authenticationManager()))
             .sessionManagement()
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        p_http.cors();
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource(){
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200", "*"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "UPDATE", "DELETE"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
 }

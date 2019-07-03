@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
  * restControllerUsers
  */
 @RestController
+@CrossOrigin(origins = "*")
 @RequestMapping("users")
 public class restControllerUsers {
 
@@ -30,7 +31,6 @@ public class restControllerUsers {
     private BCryptPasswordEncoder _passwordEncoder;
 
     @PostMapping(value = "add")
-    @CrossOrigin(origins = "*")
     public User add(final User p_user) {
 
         if (p_user != null) {
@@ -45,8 +45,7 @@ public class restControllerUsers {
      * Endpoint for registering a new user
      * @param p_user 
      */
-    @PostMapping(value = "sign-up")
-    @CrossOrigin(origins = "*")
+    @PostMapping(value = "sign-up")    
     public void signUp(final User p_user){
         
         this.add(p_user);
@@ -57,7 +56,6 @@ public class restControllerUsers {
      * @return List<User>
      */
     @GetMapping("getAll")
-    @CrossOrigin(origins = "*")
     public List<User> getAll() {
 
         ArrayList<User> usersList = this._repoUsers.findAll();
@@ -70,7 +68,6 @@ public class restControllerUsers {
      * @return List<User>
      */
     @GetMapping("get/{id}")
-    @CrossOrigin(origins = "*")
     public User getById(@PathVariable("id") int p_id) {
 
         if (p_id != 0){
@@ -86,7 +83,6 @@ public class restControllerUsers {
     }
 
     @PostMapping(value = "update")
-    @CrossOrigin(origins = "*")
     public User update(final @RequestBody User p_user) {
 
         return this.add(p_user);
