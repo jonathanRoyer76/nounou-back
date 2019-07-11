@@ -48,18 +48,18 @@ public class WebSecurity extends WebSecurityConfigurerAdapter{
     public void configure(HttpSecurity p_http) throws Exception{        
 
         p_http.csrf().disable()
+        	.cors().and()
             .authorizeRequests()
             .antMatchers("/admin/**").hasAuthority(ROLE_ADMIN)
             .antMatchers("/nounou/**").hasAnyAuthority(ROLE_ADMIN, ROLE_NOUNOU)
             .antMatchers("/users/**").hasAnyAuthority(ROLE_ADMIN, ROLE_NOUNOU)
-            .antMatchers("/users/sign-up", "/", "/login").permitAll()  // Chemins accessibles publiquement
+            .antMatchers("/sign-up", "/", "/sign-in").permitAll()  // Chemins accessibles publiquement
             .anyRequest().authenticated()
             .and()
             .addFilter(new JWTAuthenticationFilter(this._authImpl, this._repoUser))
             .addFilter(new JWTAuthorizationFilter(authenticationManager()))
             .sessionManagement()
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        p_http.cors();
     }
 
     @Bean

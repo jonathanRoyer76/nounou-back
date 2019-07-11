@@ -12,7 +12,7 @@ public class NounouBack {
 	public BCryptPasswordEncoder getBCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		SpringApplication.run(NounouBack.class, args);
 	}
 

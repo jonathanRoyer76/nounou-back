@@ -10,7 +10,11 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("admin")
-public class restControllerAdmin {
+public class RestControllerAdmin {
+	
+	public RestControllerAdmin() {
+		
+	}
 
     @GetMapping(value = "home")
     @CrossOrigin(origins = "*")

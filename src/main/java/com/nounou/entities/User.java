@@ -25,21 +25,25 @@ public class User {
     private String password;
     private String email;
     private boolean isActive = true;
-    private boolean isAdmin = false;
+    private boolean isAdmin;
 
     @ManyToOne
     @JoinColumn(name = "role_id")
     @JsonIgnoreProperties({"users"})
     private Role role;
 
-    public User(User user) {
+    public User(final User user) {
         this.setActive(user.isActive());
-        this.setUserName(user.getUserName());
-        this.setPassword(this.getPassword());    
-        this.setEmail(user.getEmail());
-        this.setId(user.getId());
+        this.userName = user.getUserName();
+        this.password = user.getPassword();    
+        this.email = user.getEmail();
+        this.id = user.getId();
+        this.role = user.getRole();
     }
     
+    /**
+     * Default constructor
+     */
     public User(){
 
     }
@@ -54,7 +58,7 @@ public class User {
     /**
      * @param id the id to set
      */
-    public void setId(int id) {
+    public void setId(final int id) {
         this.id = id;
     }
 
@@ -68,7 +72,7 @@ public class User {
     /**
      * @param userName the userName to set
      */
-    public void setUserName(String userName) {
+    public void setUserName(final String userName) {
         this.userName = userName;
     }
 
@@ -82,7 +86,7 @@ public class User {
     /**
      * @param password the password to set
      */
-    public void setPassword(String password) {
+    public void setPassword(final String password) {
         this.password = password;
     }
 
@@ -96,7 +100,7 @@ public class User {
     /**
      * @param email the email to set
      */
-    public void setEmail(String email) {
+    public void setEmail(final String email) {
         this.email = email;
     }
 
@@ -110,7 +114,7 @@ public class User {
     /**
      * @param isActive the isActive to set
      */
-    public void setActive(boolean isActive) {
+    public void setActive(final boolean isActive) {
         this.isActive = isActive;
     }
 
@@ -124,7 +128,7 @@ public class User {
     /**
      * @param isAdmin the isAdmin to set
      */
-    public void setAdmin(boolean isAdmin) {
+    public void setAdmin(final boolean isAdmin) {
         this.isAdmin = isAdmin;
     }
 
@@ -132,7 +136,7 @@ public class User {
         return role;
     }
 
-    public void setRole(Role role) {
+    public void setRole(final Role role) {
         this.role = role;
     }
 

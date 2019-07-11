@@ -1,6 +1,6 @@
 package com.nounou.constants;
 
-public enum UserRoles {
+public enum EnumUserRoles {
     ADMIN,
     USER,
     GUEST,

@@ -3,9 +3,8 @@ package com.nounou.security;
 import java.util.Collection;
 import java.util.Optional;
 
-import com.nounou.entities.User;
-import com.nounou.interfacesRepositories.IRepoUsers;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,6 +13,9 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import com.nounou.entities.User;
+import com.nounou.interfacesRepositories.IRepoUsers;
 
 /**
  * AuthenticationManagerImpl
@@ -26,6 +28,8 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
 
     @Autowired
     BCryptPasswordEncoder _passwordEncoder;
+    
+    private static final Logger logger = LoggerFactory.getLogger(JWTAuthorizationFilter.class);
 
     private String passwordToEncrypt = "";
 
@@ -38,7 +42,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
 
     @Override
     public Authentication authenticate(Authentication p_auth) throws AuthenticationException {
-        
+        logger.debug("requete de connexion recue");
         if (p_auth != null){
             String userName = p_auth.getName();            
             Collection<? extends GrantedAuthority> authoritiesList = p_auth.getAuthorities();

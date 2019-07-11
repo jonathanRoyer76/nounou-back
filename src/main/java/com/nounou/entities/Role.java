@@ -29,8 +29,8 @@ public class Role {
     @JsonIgnoreProperties({"role"})
     private Set<User> users = new HashSet<>();
 
-    public Role(String p_name){
-        this.setName(p_name);
+    public Role(final String pName){
+        this.name = pName;
     }
 
     public Role(){}
@@ -39,7 +39,7 @@ public class Role {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(final int id) {
         this.id = id;
     }
 
@@ -47,7 +47,7 @@ public class Role {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
@@ -55,7 +55,7 @@ public class Role {
         return users;
     }
 
-    public void setUsers(Set<User> users) {
+    public void setUsers(final Set<User> users) {
         this.users = users;
     }
 }

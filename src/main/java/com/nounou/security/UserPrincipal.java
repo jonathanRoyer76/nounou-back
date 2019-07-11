@@ -16,23 +16,39 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class UserPrincipal implements UserDetails {
 
     private static final long serialVersionUID = 1L;
-    private User user;
-    public UserPrincipal(User p_user){
-        this.user = p_user;
+    /**
+     * User to manipulate
+     */
+    private final User user;
+    
+    public User getUser() {
+		return user;
+	}
+
+	/**
+	 * Default constructor
+	 * @param pUser
+	 */
+    public UserPrincipal(final User pUser){
+        this.user = pUser;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<GrantedAuthority> authorities = new ArrayList<>();
+        final List<GrantedAuthority> authorities = new ArrayList<>();
 
-        if (this.user.getRole().getName().contains("Admin"))
-            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-        if (this.user.getRole().getName().contains("Nounou"))
-            authorities.add(new SimpleGrantedAuthority("ROLE_NOUNOU"));
-        if (this.user.getRole().getName().contains("Guest"))
-            authorities.add(new SimpleGrantedAuthority("ROLE_GUEST"));
-        if (this.user.getRole().getName().contains("User"))
-            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        if (this.user.getRole().getName().contains("Admin")) {
+        	authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        }            
+        if (this.user.getRole().getName().contains("Nounou")) {
+        	authorities.add(new SimpleGrantedAuthority("ROLE_NOUNOU"));
+        }   
+        if (this.user.getRole().getName().contains("Guest")){
+        	authorities.add(new SimpleGrantedAuthority("ROLE_GUEST"));
+        }
+        if (this.user.getRole().getName().contains("User")) {
+        	authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        }
 
         return authorities;
     }

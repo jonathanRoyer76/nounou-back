@@ -31,7 +31,7 @@ import io.jsonwebtoken.UnsupportedJwtException;
  */
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 
-    private static final Logger log = LoggerFactory.getLogger(JWTAuthorizationFilter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JWTAuthorizationFilter.class);
 
     public JWTAuthorizationFilter(AuthenticationManager authenticationManager){
         super(authenticationManager);
@@ -53,40 +53,41 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
 
-        String token = request.getHeader(SecurityConstants.HEADER_STRING);
+    	UsernamePasswordAuthenticationToken returnObject = null;
+    	
+        final String token = request.getHeader(SecurityConstants.HEADER_STRING);
         if (!StringUtils.isEmpty(token)) {
             try {
-                Jws<Claims> parsedToken = Jwts.parser()
+                final Jws<Claims> parsedToken = Jwts.parser()
                     .setSigningKey(SecurityConstants.SIGNING_KEY)
                     .parseClaimsJws(token.replace("Bearer ", ""));
 
-                String username = parsedToken
+                final String username = parsedToken
                     .getBody()
                     .getSubject();
 
-                List<SimpleGrantedAuthority> authorities = ((List<?>) parsedToken.getBody()
+                final List<SimpleGrantedAuthority> authorities = ((List<?>) parsedToken.getBody()
                     .get("rol")).stream()
                     .map(authority -> new SimpleGrantedAuthority((String) authority))
                     .collect(Collectors.toList());
 
                 if (!StringUtils.isEmpty(username)) {
-                    UsernamePasswordAuthenticationToken returnObject = new UsernamePasswordAuthenticationToken(username, null, authorities);
-                    return returnObject;
+                    returnObject = new UsernamePasswordAuthenticationToken(username, null, authorities);
                 }
             } catch (ExpiredJwtException exception) {
-                log.warn("Request to parse expired JWT : {} failed : {}", token, exception.getMessage());
+            	LOGGER.warn("Request to parse expired JWT : {} failed : {}", token, exception.getMessage());
             } catch (UnsupportedJwtException exception) {
-                log.warn("Request to parse unsupported JWT : {} failed : {}", token, exception.getMessage());
+            	LOGGER.warn("Request to parse unsupported JWT : {} failed : {}", token, exception.getMessage());
             } catch (MalformedJwtException exception) {
-                log.warn("Request to parse invalid JWT : {} failed : {}", token, exception.getMessage());
+            	LOGGER.warn("Request to parse invalid JWT : {} failed : {}", token, exception.getMessage());
             } catch (SignatureException exception) {
-                log.warn("Request to parse JWT with invalid signature : {} failed : {}", token, exception.getMessage());
+            	LOGGER.warn("Request to parse JWT with invalid signature : {} failed : {}", token, exception.getMessage());
             } catch (IllegalArgumentException exception) {
-                log.warn("Request to parse empty or null JWT : {} failed : {}", token, exception.getMessage());
+            	LOGGER.warn("Request to parse empty or null JWT : {} failed : {}", token, exception.getMessage());
             }
         }
 
-        return null;
+        return returnObject;
     }
 
 }
