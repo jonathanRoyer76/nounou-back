@@ -66,7 +66,5 @@ public class LoggerService {
 				p_description,
 				p_methodName);
 		this._repoLogger.save(log);
-		
-		ArrayList<Logs> logs = this._repoLogger.findAll();
 	}
 }

@@ -16,9 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.util.StringUtils;
 
 import com.nounou.entities.User;
 import com.nounou.interfacesRepositories.IRepoUsers;
@@ -33,36 +33,41 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     private static final Logger logger = LoggerFactory.getLogger(JWTAuthorizationFilter.class);
 
-    private AuthenticationManagerImpl _authenticationManager;
+    private final AuthenticationManagerImpl _authenticationManager;
 
-    private IRepoUsers _repoUser;
+    private final IRepoUsers _repoUser;
 
-    public JWTAuthenticationFilter(AuthenticationManagerImpl manager
-    , IRepoUsers p_repoUsers
+    public JWTAuthenticationFilter(final AuthenticationManagerImpl manager
+    , final IRepoUsers p_repoUsers
     ){
+    	super();
         this._authenticationManager = manager;
         this._repoUser = p_repoUsers;
        }
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest req,
-                                                HttpServletResponse res) throws AuthenticationException {
+    public Authentication attemptAuthentication(final HttpServletRequest req,
+                                                final HttpServletResponse res) {
 
-        String username = req.getParameter("userName");
+        final String username = req.getParameter("userName");
         
-        if (username == "" || username == null)
-            logger.warn("UserName absent dans la requète");
-        String password = req.getParameter("password");
-        if (password == "" || password == null)
+        if (StringUtils.isEmpty(username) || username == null) {
+        	logger.warn("UserName absent dans la requète");
+        }
+            
+        final String password = req.getParameter("password");
+        if (StringUtils.isEmpty(password) || password == null) {
             logger.warn("Password absent dans la requète");
+        }
+
 
         Collection<? extends GrantedAuthority> authoritiesList = null;
 
         // To determine a list of authorities for a user
-        Optional<User> optionUser = this._repoUser.findByUserName(username);
+        final Optional<User> optionUser = this._repoUser.findByUserName(username);
         if (optionUser.isPresent()){
-            User user = optionUser.get();
-            UserPrincipal userPrincipal = new UserPrincipal(user);
+            final User user = optionUser.get();
+            final UserPrincipal userPrincipal = new UserPrincipal(user);
             authoritiesList = userPrincipal.getAuthorities();
         }
 
@@ -77,21 +82,24 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     }
     
     // Used for logging
-    public Authentication attemptAuthentication(String p_userName,
-                                                String p_password) throws AuthenticationException {
+    public Authentication attemptAuthentication(final String p_userName,
+                                                final String p_password) {
 
-        if (p_userName == "" || p_userName == null)
-            logger.warn("UserName absent dans la requète");
-        if (p_password == "" || p_password == null)
-            logger.warn("Password absent dans la requète");
+        if (StringUtils.isEmpty(p_userName) || p_userName == null) {
+        	logger.warn("UserName absent dans la requète");
+        }
+        if (StringUtils.isEmpty(p_password) || p_password == null) {
+        	logger.warn("Password absent dans la requète");
+        }
+            
 
         Collection<? extends GrantedAuthority> authoritiesList = null;
 
         // To determine a list of authorities for a user
-        Optional<User> optionUser = this._repoUser.findByUserName(p_userName);
+        final Optional<User> optionUser = this._repoUser.findByUserName(p_userName);
         if (optionUser.isPresent()){
-            User user = optionUser.get();
-            UserPrincipal userPrincipal = new UserPrincipal(user);
+        	final User user = optionUser.get();
+            final UserPrincipal userPrincipal = new UserPrincipal(user);
             authoritiesList = userPrincipal.getAuthorities();
         }
 
@@ -106,39 +114,40 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     }
 
     @Override
-    protected void successfulAuthentication(HttpServletRequest req,
-                                            HttpServletResponse res,
-                                            FilterChain chain,
-                                            Authentication auth) throws IOException, ServletException {
+    protected void successfulAuthentication(final HttpServletRequest req,
+                                            final HttpServletResponse res,
+                                            final FilterChain chain,
+                                            final Authentication auth) throws IOException, ServletException {
 
-        String token = generateToken(auth);        
+        final String token = generateToken(auth);        
 
         res.addHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + token);
     }
     
-    public String generateToken(Authentication p_auth) {
+    public String generateToken(final Authentication p_auth) {
     	
+    	String returnValue = "";
     	try{
 
-            List<String> roles = p_auth.getAuthorities()
+            final List<String> roles = p_auth.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
             logger.info("Construction du token");
-            return Jwts.builder()
+            returnValue = Jwts.builder()
                 .signWith(SignatureAlgorithm.HS256, SecurityConstants.SIGNING_KEY)
                 .setHeaderParam("typ", SecurityConstants.TOKEN_TYPE)
                 .setIssuer(SecurityConstants.TOKEN_ISSUER)
                 .setAudience(SecurityConstants.TOKEN_AUDIENCE)
                 .setSubject(p_auth.getName())
-                .setExpiration(new Date(System.currentTimeMillis() + 864000000))
+                .setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
                 .claim("rol", roles)
                 .compact();
         }catch(Exception e){
             logger.error(e.toString());
         }
-    	return "";
+    	return returnValue;
     	
     }
 }

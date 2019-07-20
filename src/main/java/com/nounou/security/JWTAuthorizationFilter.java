@@ -33,58 +33,69 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JWTAuthorizationFilter.class);
 
-    public JWTAuthorizationFilter(AuthenticationManager authenticationManager){
-        super(authenticationManager);
+    public JWTAuthorizationFilter(final AuthenticationManager authManager){
+        super(authManager);
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest req,
-                                    HttpServletResponse res,
-                                    FilterChain chain) throws IOException, ServletException {
-        String header = req.getHeader(SecurityConstants.HEADER_STRING);
+    protected void doFilterInternal(final HttpServletRequest req,
+                                    final HttpServletResponse res,
+                                    final FilterChain chain) throws IOException, ServletException {
+        final String header = req.getHeader(SecurityConstants.HEADER_STRING);
         if (header == null || !header.startsWith(SecurityConstants.TOKEN_PREFIX)) {
             chain.doFilter(req, res);
             return;
         }
-        UsernamePasswordAuthenticationToken authentication = getAuthentication(req);
+        final UsernamePasswordAuthenticationToken authentication = getAuthentication(req);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         chain.doFilter(req, res);
     }
+    
+    public UsernamePasswordAuthenticationToken getAuthenticationFromToken(final String p_token) {
+    	return this.getAuthentication(p_token);
+    }
+    
+    private UsernamePasswordAuthenticationToken getAuthentication(final String p_token) {
+    	
+    	UsernamePasswordAuthenticationToken returnObject = null;
+    	try {
+            final Jws<Claims> parsedToken = Jwts.parser()
+                .setSigningKey(SecurityConstants.SIGNING_KEY)
+                .parseClaimsJws(p_token.replace(SecurityConstants.TOKEN_PREFIX, ""));
 
-    private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
+            final String username = parsedToken
+                .getBody()
+                .getSubject();
+
+            final List<SimpleGrantedAuthority> authorities = ((List<?>) parsedToken.getBody()
+                .get("rol")).stream()
+                .map(authority -> new SimpleGrantedAuthority((String) authority))
+                .collect(Collectors.toList());
+
+            if (!StringUtils.isEmpty(username)) {
+                returnObject = new UsernamePasswordAuthenticationToken(username, null, authorities);
+            }
+        } catch (ExpiredJwtException exception) {
+        	LOGGER.warn("Request to parse expired JWT : {} failed : {}", p_token, exception.getMessage());
+        } catch (UnsupportedJwtException exception) {
+        	LOGGER.warn("Request to parse unsupported JWT : {} failed : {}", p_token, exception.getMessage());
+        } catch (MalformedJwtException exception) {
+        	LOGGER.warn("Request to parse invalid JWT : {} failed : {}", p_token, exception.getMessage());
+        } catch (SignatureException exception) {
+        	LOGGER.warn("Request to parse JWT with invalid signature : {} failed : {}", p_token, exception.getMessage());
+        } catch (IllegalArgumentException exception) {
+        	LOGGER.warn("Request to parse empty or null JWT : {} failed : {}", p_token, exception.getMessage());
+        }
+    	
+    	return returnObject;
+    }
+
+    private UsernamePasswordAuthenticationToken getAuthentication(final HttpServletRequest request) {
 
     	UsernamePasswordAuthenticationToken returnObject = null;
-    	
         final String token = request.getHeader(SecurityConstants.HEADER_STRING);
         if (!StringUtils.isEmpty(token)) {
-            try {
-                final Jws<Claims> parsedToken = Jwts.parser()
-                    .setSigningKey(SecurityConstants.SIGNING_KEY)
-                    .parseClaimsJws(token.replace("Bearer ", ""));
-
-                final String username = parsedToken
-                    .getBody()
-                    .getSubject();
-
-                final List<SimpleGrantedAuthority> authorities = ((List<?>) parsedToken.getBody()
-                    .get("rol")).stream()
-                    .map(authority -> new SimpleGrantedAuthority((String) authority))
-                    .collect(Collectors.toList());
-
-                if (!StringUtils.isEmpty(username)) {
-                    returnObject = new UsernamePasswordAuthenticationToken(username, null, authorities);
-                }
-            } catch (ExpiredJwtException exception) {
-            	LOGGER.warn("Request to parse expired JWT : {} failed : {}", token, exception.getMessage());
-            } catch (UnsupportedJwtException exception) {
-            	LOGGER.warn("Request to parse unsupported JWT : {} failed : {}", token, exception.getMessage());
-            } catch (MalformedJwtException exception) {
-            	LOGGER.warn("Request to parse invalid JWT : {} failed : {}", token, exception.getMessage());
-            } catch (SignatureException exception) {
-            	LOGGER.warn("Request to parse JWT with invalid signature : {} failed : {}", token, exception.getMessage());
-            } catch (IllegalArgumentException exception) {
-            	LOGGER.warn("Request to parse empty or null JWT : {} failed : {}", token, exception.getMessage());
-            }
+        	returnObject = this.getAuthentication(token);
         }
 
         return returnObject;

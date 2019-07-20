@@ -1,4 +1,4 @@
-package com.nounou.restControllers;
+package com.nounou.restcontrollers;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -6,19 +6,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * restControllerAdmin
+ * restControllerNounou
  */
 @RestController
-@RequestMapping("admin")
-public class RestControllerAdmin {
-	
-	public RestControllerAdmin() {
-		
-	}
+@RequestMapping("nounou")
+public class RestControllerNounou {
 
-    @GetMapping(value = "home")
     @CrossOrigin(origins = "*")
-    public String test(){
-        return "Dans la méthode de test ADMIN";
+    @GetMapping(value = "home")    
+    public String home(){
+        return "Dans la méthode de nounou";
     }
 }
