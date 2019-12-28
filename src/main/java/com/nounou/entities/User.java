@@ -24,8 +24,8 @@ public class User {
     private String userName;
     private String password;
     private String email;
-    private boolean isActive = true;
-    private boolean isAdmin;
+    private boolean isActive = true; // NOPMD by jonathan on 20/07/2019 15:53
+    private boolean isAdmin; // NOPMD by jonathan on 20/07/2019 15:53
 
     @ManyToOne
     @JoinColumn(name = "role_id")

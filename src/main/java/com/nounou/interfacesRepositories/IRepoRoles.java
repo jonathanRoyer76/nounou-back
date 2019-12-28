@@ -11,7 +11,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * IRepoRoles
  */
 public interface IRepoRoles extends JpaRepository<Role, Integer>{
-    ArrayList<Role> findAll();
+	
+    @Override
+	ArrayList<Role> findAll();
 
     Optional<Role> findById(final int p_id);
     Optional<Role> findByName(final String p_name);    

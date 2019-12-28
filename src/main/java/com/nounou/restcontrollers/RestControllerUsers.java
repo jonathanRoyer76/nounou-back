@@ -21,10 +21,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nounou.constants.EnumExceptions;
-import com.nounou.constants.EnumUserRoles;
-import com.nounou.entities.Role;
 import com.nounou.entities.User;
-import com.nounou.interfacesRepositories.IRepoRoles;
 import com.nounou.interfacesRepositories.IRepoUsers;
 import com.nounou.security.AuthenticationManagerImpl;
 import com.nounou.security.JWTAuthenticationFilter;
@@ -46,12 +43,10 @@ public class RestControllerUsers {
     @Autowired
     private IRepoUsers _repoUsers;   
     @Autowired
-    private IRepoRoles _repoRoles; 
-    @Autowired
     private BCryptPasswordEncoder _passwordEncoder;
     @Autowired 
     private LoggerService _loggerService;
-    private static String _className = "restControllerUser";
+    private static String _className = "restControllerUser";    
 
     @PostMapping(value = "users/add")
     public User add(final User p_user) {
@@ -115,33 +110,34 @@ public class RestControllerUsers {
     	return returnObject;
     }
     
-    @GetMapping(value = "/users/getByToken")
+    @GetMapping(value = "/getByToken")  
     public User getUserFromToken(@RequestHeader(value="Authorization") final String p_tokenHeader) {
     	
     	User returnObject = null;
-    	if (p_tokenHeader != "") {
+    	final String getUserFromTokenMethodName = "getUserFromToken"; // NOPMD by jonathan on 21/07/2019 18:21
+    	if (!StringUtils.isEmpty(p_tokenHeader)) {
     		final JWTAuthorizationFilter filter = new JWTAuthorizationFilter(_authImpl);
     		UsernamePasswordAuthenticationToken object = null;
     		try {
     			object = filter.getAuthenticationFromToken(p_tokenHeader);
     		}catch(Exception e) {
-    			_loggerService.error(_className, EnumExceptions.NULLPOINTER, "Erreur en récupérant le userName du token", "getUserFromToken");
+    			_loggerService.error(_className, EnumExceptions.NULLPOINTER, "Erreur en récupérant le userName du token", getUserFromTokenMethodName);
     		}
     		if (object != null) {
     			final String userName = object.getName();
     			if (!StringUtils.isEmpty(userName)) {
-    				Optional<User> optionUser = this._repoUsers.findByUserName(userName);
+    				final Optional<User> optionUser = this._repoUsers.findByUserName(userName);
     				if (optionUser.isPresent()) {
     					returnObject = optionUser.get();
     				}else {
-    					_loggerService.warn(_className, EnumExceptions.NULLPOINTER, "Utilisateur introuvable", "getUserFromToken");
+    					_loggerService.warn(_className, EnumExceptions.NULLPOINTER, "Utilisateur introuvable", getUserFromTokenMethodName);
     				}
     			}else {
-    				_loggerService.error(_className, EnumExceptions.EMPTYSTRING, "Nom d'utilisateur vide", "getUserFromToken");
+    				_loggerService.error(_className, EnumExceptions.EMPTYSTRING, "Nom d'utilisateur vide", getUserFromTokenMethodName);
     			}
     		}
     	}else {
-    		this._loggerService.error(_className, EnumExceptions.EMPTYSTRING, "Token vide dans le header", "getUserFromToken");
+    		this._loggerService.error(_className, EnumExceptions.EMPTYSTRING, "Token vide dans le header", getUserFromTokenMethodName);
     	}
     	
     	return returnObject;
@@ -152,43 +148,17 @@ public class RestControllerUsers {
      * @param p_user 
      */
     @PostMapping(value = "sign-up")    
-    public void signUp(@RequestBody User p_user, @RequestBody int p_roleId){
+    public void signUp(@RequestBody final User p_user){
         
     	if (p_user != null) {
-    		if(p_roleId != 0) {
-    			p_user.setRole(this.getRole(p_roleId));
+    		if(p_user.getRole() != null) {
     	        this.add(p_user);
     		}else {
-    			this._loggerService.error(_className, EnumExceptions.EMPTYSTRING, "Id role absent", "signUp");
+    			this._loggerService.error(_className, EnumExceptions.EMPTYSTRING, "Role absent", "signUp");
     		}
     	}else {
     		this._loggerService.error(_className, EnumExceptions.NULLPOINTER, "p_user vide", "signUp");
     	}
-    }
-    
-    /**
-     * @param p_roleId the id od role to find
-     * @return roles for a user or default
-     */
-    private Role getRole(final int p_roleId) {
-    	
-    	Role returnObject = null;
-    	Optional<Role> optionRole = this._repoRoles.findById(p_roleId);
-    	if (optionRole.isPresent()) {
-    		// Wanted role founded
-    		returnObject = optionRole.get();
-    	}else {
-    		this._loggerService.error(_className, EnumExceptions.NULLPOINTER, "optionRole vide", "getRole");
-    	}
-    	optionRole = this._repoRoles.findByName(EnumUserRoles.USER.toString());
-    	if (optionRole.isPresent()) {
-    		// Default role returned
-    		returnObject = optionRole.get();
-    	}else {
-    		this._loggerService.error(_className, EnumExceptions.NULLPOINTER, "optionRole vide", "getRole");
-    	}
-    	
-    	return returnObject;
     }
 
     /**

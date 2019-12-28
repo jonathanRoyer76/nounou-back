@@ -11,6 +11,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * IRepoUsers
  */
 public interface IRepoUsers extends JpaRepository<User, Integer> {
+	
+	@Override
     ArrayList<User> findAll();
 
     Optional<User> findById(final int p_id);

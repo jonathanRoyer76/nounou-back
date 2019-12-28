@@ -1,7 +1,5 @@
 package com.nounou.services;
 
-import java.util.ArrayList;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +9,7 @@ import com.nounou.entities.Logs;
 import com.nounou.interfacesRepositories.IRepoLoggers;
 
 @Component
-public class LoggerService {
+public class LoggerService { // NOPMD by jonathan on 21/07/2019 12:48
 	
 	@Autowired
 	private IRepoLoggers _repoLogger;	

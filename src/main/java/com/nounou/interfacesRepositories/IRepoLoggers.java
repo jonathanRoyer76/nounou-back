@@ -13,5 +13,6 @@ import com.nounou.entities.Logs;
  */
 public interface IRepoLoggers extends JpaRepository<Logs, Integer> {
 
+	@Override
 	ArrayList<Logs> findAll();
 }
