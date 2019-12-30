@@ -35,7 +35,7 @@ public class ContratRemuneration {
 	 */
 	private double grossHourly;
 	/*
-	 * Salaire brut ensuel
+	 * Salaire brut mensuel
 	 */
 	private double grossMonthlySalary;
 	/*

@@ -48,7 +48,7 @@ public class RestControllerUsers {
     private LoggerService _loggerService;
     private static String _className = "restControllerUser";    
 
-    @PostMapping(value = "users/add")
+    @PostMapping(value = "add")
     public User add(final User p_user) {
 
     	User returnObject = p_user;
@@ -110,7 +110,7 @@ public class RestControllerUsers {
     	return returnObject;
     }
     
-    @GetMapping(value = "/getByToken")  
+    @GetMapping(value = "/users/getUserByToken")  
     public User getUserFromToken(@RequestHeader(value="Authorization") final String p_tokenHeader) {
     	
     	User returnObject = null;

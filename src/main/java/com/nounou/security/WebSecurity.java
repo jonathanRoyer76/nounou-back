@@ -53,7 +53,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter{
             .antMatchers("/admin/**").hasAuthority(ROLE_ADMIN)
             .antMatchers("/nounou/**").hasAnyAuthority(ROLE_ADMIN, ROLE_NOUNOU)
             .antMatchers("/users/**").hasAnyAuthority(ROLE_ADMIN, ROLE_NOUNOU)
-            .antMatchers("/sign-up", "/", "/sign-in", "/getByToken").permitAll()  // Chemins accessibles publiquement
+            .antMatchers("/sign-up", "/", "/sign-in", "/users/getUserByToken").permitAll()  // Chemins accessibles publiquement
             .anyRequest().authenticated()
             .and()
             .addFilter(new JWTAuthenticationFilter(this._authImpl, this._repoUser))
